@@ -1,12 +1,6 @@
-// frontend/src/api/stats.js
-
-import logger from "../middleware/logger";
-
-const API_BASE_URL = "http://localhost:5000"; // Adjust if your backend runs elsewhere
-
 export const getStatsByShortcode = async (shortcode) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/shorturls/${shortcode}`, {
+    const response = await fetch(`${API_BASE_URL}/stats/${shortcode}`, {
       method: "GET",
     });
 

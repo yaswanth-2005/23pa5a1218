@@ -1,4 +1,3 @@
-// server.js (or index.js)
 const express = require("express");
 const cors = require("cors");
 const { nanoid } = require("nanoid");
@@ -61,7 +60,13 @@ app.post("/shorturls/bulk", (req, res) => {
     const minutes = validity ? parseInt(validity) : 30;
     const expiry = new Date(Date.now() + minutes * 60 * 1000);
 
-    urlStore[code] = { originalUrl: url, expiry };
+    // Store URL with metadata
+    urlStore[code] = {
+      originalUrl: url,
+      expiry,
+      createdAt: new Date(),
+      clicks: [], // For stats
+    };
 
     result.push({
       shortlink: `http://localhost:${PORT}/${code}`,
@@ -72,7 +77,7 @@ app.post("/shorturls/bulk", (req, res) => {
   res.status(201).json(result);
 });
 
-// Redirection route
+// Redirection route (also logs click data)
 app.get("/:code", (req, res) => {
   const { code } = req.params;
   const entry = urlStore[code];
@@ -86,7 +91,31 @@ app.get("/:code", (req, res) => {
     return res.status(410).json({ error: "Link has expired." });
   }
 
+  // Log click info
+  entry.clicks.push({
+    timestamp: new Date(),
+    referrer: req.get("Referrer") || null,
+    location: req.ip || req.connection.remoteAddress,
+  });
+
   res.redirect(entry.originalUrl);
+});
+
+// Stats endpoint
+app.get("/stats/:code", (req, res) => {
+  const { code } = req.params;
+  const entry = urlStore[code];
+
+  if (!entry) {
+    return res.status(404).json({ error: "Shortcode not found." });
+  }
+
+  res.json({
+    url: entry.originalUrl,
+    createdAt: entry.createdAt,
+    expiry: entry.expiry,
+    clicks: entry.clicks,
+  });
 });
 
 app.listen(PORT, () => {

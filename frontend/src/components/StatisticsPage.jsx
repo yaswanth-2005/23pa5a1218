@@ -1,6 +1,4 @@
-// frontend/src/components/StatisticsPage.jsx
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -11,19 +9,29 @@ import {
   Divider,
   CircularProgress,
   Link,
-} from '@mui/material';
+} from "@mui/material";
 
-import { getStatsByShortcode } from '../api/stats';
-import logger from '../middleware/logger';
-
-const shortcodesToTrack = ['ex123', 'demo456']; // Replace with localStorage/session-driven data
+import { getStatsByShortcode } from "../api/stats";
+import logger from "../middleware/logger";
 
 const StatisticsPage = () => {
+  const [shortcodesToTrack, setShortcodesToTrack] = useState([]);
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Load shortcodes from localStorage only once on mount
+  useEffect(() => {
+    const storedShortcodes = JSON.parse(
+      localStorage.getItem("shortcodes") || "[]"
+    );
+    const codes = storedShortcodes.length > 0 ? storedShortcodes : ["demo123"];
+    setShortcodesToTrack(codes);
+  }, []);
+
+  // ✅ Fetch stats when shortcodes are loaded
   useEffect(() => {
     const fetchAllStats = async () => {
+      setLoading(true);
       try {
         const allData = [];
         for (let code of shortcodesToTrack) {
@@ -31,16 +39,18 @@ const StatisticsPage = () => {
           allData.push({ shortcode: code, ...data });
         }
         setStats(allData);
-        logger.info('Fetched all stats', { stats: allData });
+        logger.info("Fetched all stats", { stats: allData });
       } catch (err) {
-        logger.error('Failed to load stats', { message: err.message });
+        logger.error("Failed to load stats", { message: err.message });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAllStats();
-  }, []);
+    if (shortcodesToTrack.length > 0) {
+      fetchAllStats();
+    }
+  }, [shortcodesToTrack]);
 
   if (loading) {
     return (
@@ -67,20 +77,28 @@ const StatisticsPage = () => {
                   <Link
                     href={`http://localhost:5000/${item.shortcode}`}
                     target="_blank"
+                    rel="noopener noreferrer"
                   >
                     {item.shortcode}
                   </Link>
                 </Typography>
 
                 <Typography variant="body2" color="textSecondary">
-                  Original URL: {item.url}
+                  Original URL: {item.url || "N/A"}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Created At: {item.createdAt}
+                  Created At:{" "}
+                  {item.createdAt
+                    ? new Date(item.createdAt).toLocaleString()
+                    : "N/A"}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Expiry Date: {item.expiry || 'Never'}
+                  Expiry Date:{" "}
+                  {item.expiry
+                    ? new Date(item.expiry).toLocaleString()
+                    : "Never"}
                 </Typography>
+
                 <Typography variant="body1" sx={{ mt: 1 }}>
                   🔁 Total Clicks: {item.clicks?.length || 0}
                 </Typography>
@@ -93,10 +111,10 @@ const StatisticsPage = () => {
                       {new Date(click.timestamp).toLocaleString()}
                     </Typography>
                     <Typography variant="body2">
-                      Referrer: {click.referrer || 'N/A'}
+                      Referrer: {click.referrer || "N/A"}
                     </Typography>
                     <Typography variant="body2">
-                      Location: {click.location || 'Unknown'}
+                      Location: {click.location || "Unknown"}
                     </Typography>
                   </Box>
                 ))}

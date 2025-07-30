@@ -38,7 +38,6 @@ const ShortenerForm = () => {
     const updated = entries.filter((_, i) => i !== index);
     setEntries(updated);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -56,6 +55,13 @@ const ShortenerForm = () => {
       const result = await shortenUrls(entries);
       setShortened(result);
       logger.debug("Shortened result:", { result });
+
+      const newShortcodes = result.map((item) =>
+        item.shortlink.split("/").pop()
+      );
+      const existing = JSON.parse(localStorage.getItem("shortcodes") || "[]");
+      const combined = [...new Set([...existing, ...newShortcodes])];
+      localStorage.setItem("shortcodes", JSON.stringify(combined));
     } catch (err) {
       logger.error("Failed to shorten URLs", { error: err });
       alert("Failed to shorten URLs. Check logs for details.");
@@ -63,7 +69,15 @@ const ShortenerForm = () => {
   };
 
   return (
-    <Container maxWidth="md">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+      }}
+    >
       <Typography variant="h4" align="center" gutterBottom>
         URL Shortener
       </Typography>
@@ -133,7 +147,7 @@ const ShortenerForm = () => {
         </Box>
         <ShortenerList urls={shortened} />
       </form>
-    </Container>
+    </div>
   );
 };
 
