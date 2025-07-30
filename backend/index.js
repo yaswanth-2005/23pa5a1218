@@ -8,16 +8,13 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
-// In-memory store
 const urlStore = {};
 
-// Helper to validate shortcode
 function isValidShortcode(code) {
   const regex = /^[a-zA-Z0-9]{4,10}$/;
   return regex.test(code);
 }
 
-// Bulk shortener route
 app.post("/shorturls/bulk", (req, res) => {
   const entries = req.body;
 
@@ -60,12 +57,11 @@ app.post("/shorturls/bulk", (req, res) => {
     const minutes = validity ? parseInt(validity) : 30;
     const expiry = new Date(Date.now() + minutes * 60 * 1000);
 
-    // Store URL with metadata
     urlStore[code] = {
       originalUrl: url,
       expiry,
       createdAt: new Date(),
-      clicks: [], // For stats
+      clicks: [],
     };
 
     result.push({
@@ -77,7 +73,6 @@ app.post("/shorturls/bulk", (req, res) => {
   res.status(201).json(result);
 });
 
-// Redirection route (also logs click data)
 app.get("/:code", (req, res) => {
   const { code } = req.params;
   const entry = urlStore[code];
@@ -91,7 +86,6 @@ app.get("/:code", (req, res) => {
     return res.status(410).json({ error: "Link has expired." });
   }
 
-  // Log click info
   entry.clicks.push({
     timestamp: new Date(),
     referrer: req.get("Referrer") || null,
@@ -101,7 +95,6 @@ app.get("/:code", (req, res) => {
   res.redirect(entry.originalUrl);
 });
 
-// Stats endpoint
 app.get("/stats/:code", (req, res) => {
   const { code } = req.params;
   const entry = urlStore[code];
