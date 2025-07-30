@@ -1,7 +1,7 @@
 // frontend/src/components/ShortenerForm.jsx
 // import { validateEntry } from '../utils/validators';
-import { shortenUrls } from '../api/shorten';
-import React, { useState } from 'react';
+import { shortenUrls } from "../api/shorten";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -10,16 +10,16 @@ import {
   TextField,
   Typography,
   Paper,
-} from '@mui/material';
-import logger from '../middleware/logger';
-import { validateEntry } from '../utills/validator';
-import ShortenerList from './shortenerlist';
+} from "@mui/material";
+import logger from "../middleware/logger";
+import { validateEntry } from "../utills/validator";
+import ShortenerList from "./shortenerlist";
 
 const MAX_URLS = 5;
 
 const ShortenerForm = () => {
   const [entries, setEntries] = useState([
-    { url: '', validity: '', shortcode: '' },
+    { url: "", validity: "", shortcode: "" },
   ]);
   const [shortened, setShortened] = useState([]);
   const handleChange = (index, field, value) => {
@@ -30,7 +30,7 @@ const ShortenerForm = () => {
 
   const addUrlField = () => {
     if (entries.length < MAX_URLS) {
-      setEntries([...entries, { url: '', validity: '', shortcode: '' }]);
+      setEntries([...entries, { url: "", validity: "", shortcode: "" }]);
     }
   };
 
@@ -45,20 +45,20 @@ const ShortenerForm = () => {
     const allErrors = entries.map(validateEntry);
     const hasErrors = allErrors.some((error) => Object.keys(error).length > 0);
     if (hasErrors) {
-      logger.warn('Validation failed', { allErrors });
-      alert('Validation failed. Please check your input fields.');
+      logger.warn("Validation failed", { allErrors });
+      alert("Validation failed. Please check your input fields.");
       return;
     }
 
-    logger.info('Form submitted with entries', { entries });
+    logger.info("Form submitted with entries", { entries });
 
     try {
       const result = await shortenUrls(entries);
       setShortened(result);
-      logger.debug('Shortened result:', { result });
+      logger.debug("Shortened result:", { result });
     } catch (err) {
-      logger.error('Failed to shorten URLs', { error: err });
-      alert('Failed to shorten URLs. Check logs for details.');
+      logger.error("Failed to shorten URLs", { error: err });
+      alert("Failed to shorten URLs. Check logs for details.");
     }
   };
 
@@ -79,9 +79,7 @@ const ShortenerForm = () => {
                   fullWidth
                   required
                   value={entry.url}
-                  onChange={(e) =>
-                    handleChange(index, 'url', e.target.value)
-                  }
+                  onChange={(e) => handleChange(index, "url", e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -92,7 +90,7 @@ const ShortenerForm = () => {
                   type="number"
                   value={entry.validity}
                   onChange={(e) =>
-                    handleChange(index, 'validity', e.target.value)
+                    handleChange(index, "validity", e.target.value)
                   }
                 />
               </Grid>
@@ -103,7 +101,7 @@ const ShortenerForm = () => {
                   fullWidth
                   value={entry.shortcode}
                   onChange={(e) =>
-                    handleChange(index, 'shortcode', e.target.value)
+                    handleChange(index, "shortcode", e.target.value)
                   }
                 />
               </Grid>
@@ -132,9 +130,8 @@ const ShortenerForm = () => {
           <Button type="submit" variant="contained" color="primary">
             Shorten URLs
           </Button>
-              </Box>
-              <ShortenerList urls={shortened} />
-
+        </Box>
+        <ShortenerList urls={shortened} />
       </form>
     </Container>
   );

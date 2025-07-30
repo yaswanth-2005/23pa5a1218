@@ -1,14 +1,5 @@
-// frontend/src/components/ShortenerList.jsx
-
-import React from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Link,
-} from '@mui/material';
+import React from "react";
+import { Box, Typography, Card, CardContent, Grid, Link } from "@mui/material";
 
 const ShortenerList = ({ urls }) => {
   if (!urls || urls.length === 0) return null;
@@ -24,29 +15,28 @@ const ShortenerList = ({ urls }) => {
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="subtitle2" color="textSecondary">
-                  Original URL:
-                </Typography>
-                <Typography variant="body2" noWrap>
-                  {item.url}
-                </Typography>
-
-                <Typography variant="subtitle2" mt={1} color="textSecondary">
                   Shortened URL:
                 </Typography>
                 <Link
-                  href={`http://localhost:5000/${item.shortcode}`}
+                  href={item.shortlink}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {`http://localhost:5000/${item.shortcode}`}
+                  {item.shortlink}
                 </Link>
 
                 {item.expiry && (
                   <>
-                    <Typography variant="subtitle2" mt={1} color="textSecondary">
+                    <Typography
+                      variant="subtitle2"
+                      mt={1}
+                      color="textSecondary"
+                    >
                       Expires At:
                     </Typography>
-                    <Typography variant="body2">{item.expiry}</Typography>
+                    <Typography variant="body2">
+                      {new Date(item.expiry).toLocaleString()}
+                    </Typography>
                   </>
                 )}
               </CardContent>
